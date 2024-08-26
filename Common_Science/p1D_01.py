@@ -127,15 +127,11 @@ def tst_():
     plt.plot(x, ys)
     plt.grid(); plt.show()
 
-
-
-
-
 if __name__=="__main__":
     # task_01_easy_1Dfunc_and_grap()
     # task_02_random_number_generation()
     # task_02_random_rock_density()
-    # task_02_random_gauss()
+    task_02_random_gauss()
     # task_03_easy_1Dfunc_with_noise_and_grap()
-    home_tasks()
+    # home_tasks()
     # tst_()
