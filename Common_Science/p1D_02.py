@@ -217,7 +217,6 @@ def work_with_05fun():
 #  --07- Special function for visualisation
 def view(x:np.ndarray,y:list,ylabels:list=(), title:str=''):
     if title: plt.title(title)
-    print(len(x),len(y[0]))
     for i in range(len(y)):
         lbl  = ylabels[i] if ylabels != [] else ""
         plt.plot(x,y[i],label=lbl)
