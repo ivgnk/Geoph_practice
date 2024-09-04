@@ -5,6 +5,8 @@ Service for p1D_02.py
 Non moving average filters
 """
 import inspect # www.geeksforgeeks.org/python-how-to-get-function-name/
+from cProfile import label
+
 from icecream import ic
 
 from math import sqrt
@@ -76,26 +78,105 @@ def wiener_filter():
         plt.plot(x,res[i],label='окно '+str(SMA_w[i]), linewidth=lw[i])
     plt.legend();   plt.grid(); plt.show()
 
-from scipy.signal import butter, bessel, sosfilt
+
+import random
+def make_data_for_Butter(is_view:bool=False):
+    """
+    p1D_01.py - > task_03_easy_1Dfunc_with_noise_and_grap()
+    :return:
+    """
+    # x = np.arange(-10.0, 10.1, 0.2)
+    # y = -x + x ** 2 - x ** 3
+    x = np.arange(0, 20.1, 0.1)
+    t = np.linspace(0, 20.1, 201, False)
+    y = -(x-10) + (x-10)**2 - (x-10)** 3
+    random.seed(123)
+    # т.к. хотим чтобы случайные
+    # последовательности всегда были одинаковы
+    # т.к. умножаем каждый элемент списка на число
+    rnd = np.array([random.uniform(-1,1) for i in range(len(x))])
+
+    noise1 = 0.75 * y * rnd;  y1 = y + noise1
+    noise2 = 0.75 * np.max(y) * rnd; y2 = y + noise2
+    if is_view:
+        plt.plot(x, y,  label='Исход.')
+        plt.plot(x, y1, label='+шум1')  # меньший шум
+        plt.plot(x, y2, label='+шум2')  # больший шум
+        plt.legend(loc='upper right'); plt.grid(); plt.show()
+    return x, y2 # больший шум
+
+
+from scipy.signal import butter, bessel, sosfilt, freqs
 def butter_filter():
-    n = 3
-    res=[[0] * n for i in range(n)]
-    x, y = p1D_02.make_and_view_data()
-    Wn_ = [10,20,30]; btype_= 'low' # 'lowpass'
-    fs_ = [1000,2000,3000]
+    x,y = make_data_for_Butter(False) # сдвинули вигнал так, чтобы он начинался с нуля
+    fs_ = [10] # частота дискретизации
+    nfs=len(fs_) # сколько вариантов fs рассматриваем
+    # 0 < Wn < fs/2 (fs=20 -> fs/2=10.0)
+    Wn_ = [4,2,1] # критические частоты (частоты среза) ФНЧ
+    nwn = len(Wn_) # сколько вариантов Wn рассматриваем
+    btype_= 'low' # 'lowpass'
+    res=[[0] * nfs for i in range(nwn)]
+    plt.figure(figsize=(12, 8))
     plt.title(f'Фильтр Баттерворта. В сигнале {len(y)} точка')
-    for i in range(n):
-        for j in range(n):
+    plt.plot(x,y,label='ini',linewidth=2)
+    for i in range(nwn):
+        for j in range(nfs):
             w=Wn_[i]; f=fs_[j]
-            sos = butter(N=15, Wn=w, btype=btype_, fs=f, output='sos')  # butter, bessel
+            sos = butter(N=1, Wn=w, btype=btype_, fs=f, output='sos')  # butter, bessel
             res[i][j] = sosfilt(sos, y)
-            plt.plot(x, res[i][j], label='окно ' + str(w) +' частота '+str(f))
+            plt.plot(x, res[i][j], label='критическая частота =' + str(w))
+    plt.xlabel('Время, сек'); plt.ylabel('Амплитуда, у.е.')
     plt.legend();   plt.grid(); plt.show()
+
+def butter_filter_freq():
+    # вывод частоной характеристики фильтра
+    fs_ = [10] # частота дискретизации
+    nfs=len(fs_) # сколько вариантов fs рассматриваем
+    # 0 < Wn < fs/2 (fs=20 -> fs/2=10.0)
+    Wn_ = [4,2,1] # критические частоты (частоты среза) ФНЧ
+    nwn = len(Wn_) # сколько вариантов Wn рассматриваем
+    btype_= 'low' # 'lowpass'
+    col=['blue','red','green']
+    plt.figure(figsize=(12, 8))
+    plt.title(f'Фильтр Баттерворта. Амплитудно-частотные характеристики')
+    for i in range(nwn):
+        print(i, Wn_[i])
+        w1=Wn_[i]
+        b, a = butter(N=1, Wn=w1, btype=btype_, analog=True)  # butter, bessel
+        w, h = freqs(b, a)
+        plt.semilogx(w, 20 * np.log10(abs(h)), color=col[i]) # ,label=str(w)+' Hz'
+        plt.axvline(w1, color=col[i], label='cutoff frequency ' + str(w1),linestyle='dashed')  # cutoff frequency
+        plt.grid(which='both', axis='both')
+    # plt.xlabel('Frequency [radians / second], 1 рад/с = 0,159155 Гц ')
+    plt.xlabel('Frequency [Гц]')
+    plt.ylabel('Amplitude [dB]')
+    plt.legend(); plt.show()
+def cmp_arange_linspace():
+    '''
+    Comaprae functions np.arange, np.linspace
+    :return:
+    '''
+    # np.arange
+    # x = np.arange(-10.0, 10.1, 0.1)  # хвосты после нуля
+    x = np.arange(0.0, 20.1, 0.1)    # без хвостов после нуля
+    print('x')
+    print(x.min(), x.max(), len(x), x[1]-x[0])
+    n=5 # round(number, ndigits=None) - ndigits precision after the decimal point
+    print(round(x.min(),n), round(x.max(),n), len(x), round(x[1]-x[0],n))
+
+    # np.linspace
+    print('t')
+    t = np.linspace(0, 20.1, 201, False)
+    print(t.min(), t.max(), len(x), t[1]-t[0])
+    print('tnorm')
+    t = np.linspace(0, 1, 10, False)
+    print(t.min(), t.max(), len(x), t[1]-t[0])
 
 
 if __name__=='__main__':
     # view_savgol()
     # wiener_filter()
-    butter_filter()
-
-
+    # butter_filter()
+    butter_filter_freq()
+    # cmp_arange_linspace()
+    # t = np.linspace(0, 1, 1000, False)
