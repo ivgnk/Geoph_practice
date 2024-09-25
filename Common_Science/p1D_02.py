@@ -37,6 +37,24 @@ def make_and_view_data(is_view=False):
         plt.legend(loc='upper right'); plt.grid(); plt.show()
     return x, y2 # больший шум
 
+def make_and_view_data_all(is_view=False):
+    x = np.arange(-10.0, 10.1, 0.2)
+    y = -x + x ** 2 - x ** 3
+    random.seed(123)
+    # т.к. хотим чтобы случайные
+    # последовательности всегда были одинаковы
+    # т.к. умножаем каждый элемент списка на число
+    rnd = np.array([random.uniform(-1,1) for i in range(len(x))])
+
+    noise1 = 0.75 * y * rnd;  y1 = y + noise1
+    noise2 = 0.75 * np.max(y) * rnd; y2 = y + noise2
+    if is_view:
+        plt.plot(x, y,  label='Исход.')
+        plt.plot(x, y1, label='+шум1')  # меньший шум
+        plt.plot(x, y2, label='+шум2')  # больший шум
+        plt.legend(loc='upper right'); plt.grid(); plt.show()
+    return x, y, y1, y2 # x, y, y+ меньший шум, y+больший шум
+
 # -- 01 -- Базовая функция для равновесового сглаживания
 def MA_equal_weight(dat, win_size):
     """

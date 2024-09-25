@@ -173,10 +173,16 @@ def cmp_arange_linspace():
     print(t.min(), t.max(), len(x), t[1]-t[0])
 
 
+from scipy.integrate import quad
+def integrextrap1D():
+    # - вариант p1D_02.make_and_view_data, выводящий все данные
+    # return x, y, y1, y2 # x, y, y+ меньший шум, y+больший шум
+    x, y, y1, y2 = p1D_02.make_and_view_data_all(False)
+
 if __name__=='__main__':
     # view_savgol()
     # wiener_filter()
     # butter_filter()
-    butter_filter_freq()
-    # cmp_arange_linspace()
+    # butter_filter_freq()
+    cmp_arange_linspace()
     # t = np.linspace(0, 1, 1000, False)
