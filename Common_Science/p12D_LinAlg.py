@@ -68,8 +68,36 @@ def vec_proizv4():
     # ic(np.tensordot(a, b)) # - error
     ic(np.kron(a, b)) # array([18, 15, 12, 12, 10,  8,  6,  5,  4])
 
+def tensorsolve():
+    #  https://numpy.org/doc/stable/reference/generated/numpy.linalg.tensorsolve.html#numpy.linalg.tensorsolve
+    a = np.eye(2 * 3 * 4)
+    a.shape = (2 * 3, 4, 2, 3, 4)
+    rng = np.random.default_rng()
+    b = rng.normal(size=(2 * 3, 4))
+    print(a)
+    print(b)
+    x = np.linalg.tensorsolve(a, b)
+    print(x.shape)
+    print(np.allclose(np.tensordot(a, x, axes=3), b))
+
+def SLAU():
+    # declaring the arrays array
+    X = np.array([[60, 40, 50], [10, 20, 30], [70, 80, 90]])
+    Y = np.array([18, 19, 20])
+
+    out1 = np.linalg.tensorsolve(X, Y)
+    print('tensorsolve =', out1)
+    out2 = np.linalg.solve(X, Y)
+    print('solve = ', out2)
+
+def lstsq():
+    x = np.array([0, 1, 2, 3])
+    y = np.array([-1, 0.2, 0.9, 2.1])
 
 if __name__=="__main__":
     # print(vec_proizv3()) # [ 3 -6  3]
     # smesh_proizv2()
-    vec_proizv4()
+    # vec_proizv4()
+    # tensorsolve()
+    # SLAU()
+    lstsq()
