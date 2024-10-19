@@ -113,8 +113,63 @@ def Poly05_intgr():
     plt.plot(x,yd, label='integr')
     plt.grid(); plt.legend();  plt.show()
 
+from pprint import pp
+from icecream import ic
+def Poly06_oper():
+    p1 = np.poly1d([1, 2])
+    p2 = np.poly1d([9, 5, 4])
+    padd=np.polyadd(p1, p2)  # сложение
+    padd2=np.polyadd(padd, -p1) # вычитание
+    pmul = np.polymul(p1,p2) # умножение
+    ic(p1); ic(p2); ic(padd); ic(padd2); ic(pmul)
+    pdiv = np.polydiv(pmul,p1) # деление
+    ic(pdiv) # деление - основной результат и остаток от деления
+    # остаток - значение числителя, знаменатель p1
 
-# Poly02_def()
-# Poly03_calc()
-# Poly04_diff()
-Poly05_intgr()
+from sympy import poly, pdiv, simplify
+from sympy.abc import x
+def SymPy_Poly():
+    top=poly(1.5*x+1.75)
+    bot=poly(2*x+1)
+    expr=simplify(top*bot)
+    print(expr)
+    ###########
+    top2 = poly(3 * x ** 2 + 5 * x + 1.75)
+    top3 = poly(3 * x ** 2 + 5 * x + 2)
+    expr2 = pdiv(top2, bot)
+    print(expr2)
+    expr3 = pdiv(top3, bot)
+    print(expr3)
+
+def Leg_appr():
+    nn=100
+    x = [-50, 0,  5 , 15, 25, 75 , 100]
+    coeff = [0.1, 0.1, 0.3, 0.5]
+    y = np.polyval(np.poly1d(coeff), x)
+    print(np.poly1d(coeff))
+
+    new_x = np.linspace(np.min(x), np.max(x),100)
+    y2 = np.polyval(np.poly1d(coeff), new_x)
+    plt.plot(x, y, 'o', label='ini points')
+    plt.plot(new_x, y2, '-', label='ini line')
+    plt.xlabel('x');  plt.ylabel('y'); plt.grid()
+    plt.title('Аппроксимация полиномами Лежандра')
+
+    nleg=[2,3,4]
+    lst=['dotted','dashed','dashdot']
+    lw=[1,2,3]
+    for i in reversed(range(len(nleg))):
+        legendre_coefs = np.polynomial.legendre.legfit(x, y, nleg[i])
+        new_y = np.polynomial.legendre.legval(new_x, legendre_coefs)
+        plt.plot(new_x, new_y, linestyle=lst[i], linewidth=lw[i], label='appr '+str(nleg[i]))
+    plt.legend()
+    plt.show()
+
+if __name__=="__main__":
+    # Poly02_def()
+    # Poly03_calc()
+    # Poly04_diff()
+    # Poly05_intgr()
+    # SymPy_Poly()
+    # Poly06_oper()
+    Leg_appr()

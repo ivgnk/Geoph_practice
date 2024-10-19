@@ -2,6 +2,7 @@
 The numpy.ma module
 https://numpy.org/doc/stable/reference/maskedarray.generic.html
 """
+import matplotlib.pyplot as plt
 import numpy as np
 import numpy.ma as ma
 from statistics import mean
@@ -72,9 +73,28 @@ def prf_d03():
     # print(ma.count_masked(xm))
     pass
 
+from icecream import ic
+def prf_d04():
+    def fun(x):
+        return 2 + 4 * x - 2 * (x - 2) ** 2 + 3 * (x + 5) ** 3
+    n=30
+    x=np.linspace(-10,10,n)
+    y = fun(x)
+    plt.plot(x,y,'bo')
+    # Маскировать каждое второе значение
+    msk = [1 if i%2==1 else 0 for i in range(n)]
+    xm= ma.array(x, mask = msk)
+    plt.plot(xm,y,'r.')
+    ym = fun(xm)
+    plt.plot(xm,ym,'g+')
+    plt.grid(); plt.show()
+    print(msk)
+    for i in range(n):
+        print(f'{i} {x[i]:6.2f} {y[i]:12.4f} {xm[i]:6.2f}, {ym[i]:12.4f}')
 
-prf_d03()
-# x = np.ma.array([1., -1, np.nan, np.inf], mask=[1] + [0]*3)
-# print(x.data)
-# print(x.mask)
-# print(x.fill_value)
+if __name__=="__main__":
+    prf_d04()
+    # x = np.ma.array([1., -1, np.nan, np.inf], mask=[1] + [0]*3)
+    # print(x.data)
+    # print(x.mask)
+    # print(x.fill_value)

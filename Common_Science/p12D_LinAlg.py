@@ -3,6 +3,8 @@ https://numpy.org/doc/stable/reference/generated/numpy.vecdot.html#numpy.vecdot
 https://bemind.gitbook.io/neural/uchebniki/uchebniki-po-pandas-i-numpy/numpy/kak-rasschitat-vektornoe-proizvedenie-v-python
 """
 import numpy as np
+import matplotlib.pyplot as plt
+
 def vec_proizv():
     a = np.array([2, -3, -1])
     b = np.array([3, -1, -4])
@@ -94,10 +96,48 @@ def lstsq():
     x = np.array([0, 1, 2, 3])
     y = np.array([-1, 0.2, 0.9, 2.1])
 
+import random
+from icecream import ic
+def corr_coeff():
+    x = np.arange(-10.0, 10.1, 0.2)
+    y = -x + x ** 2 - x ** 3
+    random.seed(123)
+    # т.к. хотим чтобы случайные
+    # последовательности всегда были одинаковы
+    # т.к. умножаем каждый элемент списка на число
+    rnd = np.array([random.uniform(-1,1) for i in range(len(x))])
+    noise1 = 0.75 * y * rnd;  y1 = y + noise1
+    noise2 = 0.75 * np.max(y) * rnd; y2 = y + noise2
+    ic(np.corrcoef(y, y1))
+    ic(np.corrcoef(y, y2))
+    ic(np.corrcoef(y1, y2))
+    # np.corrcoef возвращает корреляционную матрицу переменных.
+    # Это двумерный массив с коэффициентами корреляции.
+    # Диагональные элементы матрицы всегда равны 1,
+    # они представляют корреляцию переменной с самой собой.
+    # Остальные элементы матрицы — коэффициенты корреляции каждой пары переменных.
+
+
+    # plt.plot(x, y,  label='Исход.')
+    # plt.plot(x, y1, label='+шум1')
+    # plt.plot(x, y2, label='+шум2')
+    # plt.legend(loc='upper right'); plt.grid(); plt.show()
+
+def cheb01():
+    x = np.linspace(-1.0, 1.0)
+    fun = np.polynomial.Chebyshev((6,7,9))
+    y = fun(x)
+    plt.plot(x,y); plt.grid()
+    plt.show()
+
 if __name__=="__main__":
     # print(vec_proizv3()) # [ 3 -6  3]
     # smesh_proizv2()
     # vec_proizv4()
     # tensorsolve()
     # SLAU()
-    lstsq()
+    # lstsq()
+    # corr_coeff()
+    cheb01()
+
+
