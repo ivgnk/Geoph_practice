@@ -192,12 +192,16 @@ def compare_lin_interpolations():
             plt.title(f'{i} points, {ngridx * ngridy} grd pnts')
     plt.show()
 
+def cmp1():
+    x = np.asarray([0, 1, 2, 3, 0.5, 1.5, 2.5, 1, 2, 1.5])
+    y = np.asarray([0, 0, 0, 0, 1.0, 1.0, 1.0, 2, 2, 3.0])
+    plt.scatter(x,y)
+    plt.grid()
+    plt.show()
+
 def cmp2():
     """
     https://www.demo2s.com/python/python-matplotlib-tri-cubictriinterpolator.html
-    ==============
-    Triinterp Demo
-    ==============
     Interpolation from triangular grid to quad grid.
     """
     # Create triangulation.
@@ -250,12 +254,90 @@ def cmp2():
     fig.tight_layout()
     plt.show()
 
+from scipy.spatial import Delaunay
+def triangulations_using_matplotlib():
+    # Часть 1 - исх.данные
+    # Generate some random points
+    # 0<=x<1, 0<=y<1
+    points = np.random.rand(177, 2)
+    print(points)
+    fig = plt.figure(figsize=(18, 8))
+    fig.add_subplot(1, 2, 1) # Назначаем левую часть для работы
+    plt.title('Исх.точки')
+    plt.scatter(points[:,0], points[:,1], 10)
+    plt.grid()
+    # Часть 2 - триангуляция
+    tri = Delaunay(points)
+    fig.add_subplot(1, 2, 2) # Назначаем правую часть для работы
+    # use Matplotlib’s triplot function to visualize the triangulation.
+    plt.title('Триангуляция Делоне')
+    plt.triplot(points[:, 0], points[:, 1], tri.simplices.copy())
+    plt.plot(points[:, 0], points[:, 1], 'o')
+    plt.grid()
+    plt.show()
+
+def triangulations_using_matplotlib2():
+    # https://www.geeksforgeeks.org/triangulations-using-matplotlib/
+    points = np.array([[0, 0], [0, 1], [0, 2],   [1, 0], [1, 1], [1, 2],
+                       [2, 0], [2, 1], [2, 2],   [3, 0], [3, 1], [3, 2],   [4, 0], [4, 1], [4, 2]])
+    tri = Delaunay(points)
+    print(tri.simplices)
+    fig = plt.figure(figsize=(18, 8))
+    fig.add_subplot(1, 2, 1) # Назначаем левую часть для работы
+    plt.title('Треугольники')
+    plt.triplot(points[:, 0], points[:, 1], tri.simplices.copy())
+    # tri.simplices.copy() - это список треугольников (в двухмерном случае)
+    # в триангуляции Делоне. Каждый треугольник представлен как три целых числа:
+    # каждое значение представляет индекс (от 0 до n-1) в исходном массиве точек.
+    # https://stackoverflow.com/questions/28245327/filling-triangles-in-matplotlib-triplot-with-individual-colors
+    plt.plot(points[:, 0], points[:, 1], 'o')
+    fig.add_subplot(1, 2, 2) # Назначаем правую часть для работы
+    plt.title('Треугольники с заливкой')
+    centers = np.sum(points[tri.simplices], axis=1, dtype='int') / 3.0
+    w=np.max(points[:,0])
+    h=np.max(points[:,1])
+    # Цвета задаем как меру удаления от центра
+    colors = np.array([(x - w / 2) ** 2 + (y - h / 2) ** 2 for x, y in centers])
+    plt.tripcolor(points[:, 0], points[:, 1], tri.simplices.copy(), facecolors=colors, edgecolors='k') # facecolors=colors
+    plt.show()
+
+def with_colors():
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from scipy.spatial import Delaunay
+    import matplotlib.image as mpimg
+
+    h = 300
+    w = 1000
+    npts = 1500
+
+    pts = np.zeros((npts, 2))
+    pts[:, 0] = np.random.randint(0, w, npts)
+    pts[:, 1] = np.random.randint(0, h, npts)
+    tri = Delaunay(pts)
+
+    plt.xlim(0, w)
+    plt.ylim(0, h)
+
+    # Determine the color used for each triangle based upon the orthocenter
+    # of the triangle and the corresponding pixel color in a background image.
+
+    centers = np.sum(pts[tri.simplices], axis=1, dtype='int') / 3.0
+    colors = np.array([(x - w / 2) ** 2 + (y - h / 2) ** 2 for x, y in centers])
+    print(colors)
+    plt.tripcolor(pts[:, 0], pts[:, 1], tri.simplices.copy(), facecolors=colors, edgecolors='k') # facecolors=colors
+    plt.gca().set_aspect('equal')
+    plt.show()
+
 if __name__=="__main__":
     # pcolormesh1()
     # cntr1()
     # cntr5()
     # sphere_function()
     # contour_plot_of_irregularly_spaced_data()
-    compare_lin_interpolations()
-    # cmp2()
-
+    # compare_lin_interpolations()
+    # cmp1()
+    cmp2()
+    # triangulations_using_matplotlib()
+    # triangulations_using_matplotlib2()
+    # with_colors()
