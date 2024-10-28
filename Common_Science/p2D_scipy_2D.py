@@ -48,6 +48,7 @@ def tst_griddata2():
     xreg=np.linspace(0,1,101)
     yreg=np.linspace(0,1,101)
     # pnt_reg=np.array([xreg, yreg])
+
     grid_z0 = griddata((xrnd, yrnd), valrnd, (xreg[None, :], yreg[:, None]), method='nearest')
     grid_z1 = griddata((xrnd, yrnd), valrnd, (xreg[None, :], yreg[:, None]), method='linear')
     grid_z2 = griddata((xrnd, yrnd), valrnd, (xreg[None, :], yreg[:, None]), method='cubic')
@@ -77,7 +78,7 @@ def tst_griddata2():
     plt.contour(xreg, yreg, grid_z2, 15, linewidths=0.5, colors='k')
     plt.contourf(xreg, yreg, grid_z2, 15, cmap=plt.cm.jet)
     plt.colorbar()  # draw colorbar
-    
+
     plt.gcf().set_size_inches(10, 8)
     plt.show()
 
@@ -124,5 +125,79 @@ def tst_griddata4():
     plt.title('griddata test (%d points)' % len(x))
     plt.show()
 
+from icecream import ic
+def tst_griddata2n():
+    def func(x, y):
+        return x * (1 - x) * np.cos(4 * np.pi * x) * np.sin(4 * np.pi * y ** 2) ** 2
+
+    # np.random.seed(125)
+    rng = np.random.default_rng(125)
+    # генерирует 1000 случ. чисел в диапазоне от 0 (включительно) до 1 (исключительно).
+    pnt_rnd = rng.random((1000, 2))
+    # Другие наборы - rng.integers(low[, high, size, dtype, endpoint])
+    # Return random integers from low (inclusive) to high (exclusive),
+    # or if endpoint=True, low (inclusive) to high (inclusive).
+    xrnd, yrnd = pnt_rnd[:, 0], pnt_rnd[:, 1]
+    print(len(xrnd), pnt_rnd.shape)
+    # ic(np.max(xrnd), np.max(yrnd), np.min(xrnd), np.min(yrnd))
+    valrnd = func(xrnd, yrnd)
+    xreg = np.linspace(0, 1, 201) # от 0 до 1, т.к. см. rng.random
+    yreg = np.linspace(0, 1, 101)
+    # pnt_reg=np.array([xreg, yreg])
+    n=3
+    methods = ['nearest', 'linear', 'cubic']; grids=[0]*n
+    for i in range(n):
+        grids[i] = griddata((xrnd, yrnd), valrnd, (xreg[None, :], yreg[:, None]), method=methods[i])
+    # --------------- 1
+    plt.subplot(221)
+    plt.grid()
+    plt.scatter(xrnd, yrnd, 8)
+    plt.title('Original pnt')
+    # --------------- 2
+    for i in range(n):
+        plt.subplot(222+i)
+        plt.grid()
+        plt.contour(xreg, yreg, grids[i], 15, linewidths=0.5, colors='k')
+        plt.contourf(xreg, yreg, grids[i], 15, cmap=plt.cm.jet)
+        plt.title(methods[i])
+        plt.colorbar()  # draw colorbar
+
+    plt.gcf().set_size_inches(10, 8)
+    plt.show()
+    ic(type(grids), len(grids))
+    ic(type(grids[0]), len(grids[0]))
+    ic(type(grids[0][0]), len(grids[0][0]))
+
+def export_griddata():
+    # Step 1: Data
+    # Example scattered data points
+    points = np.array([[0, 0], [1, 1], [1, 0], [0, 1]])
+    values = np.array([0, 1, 0.5, 0.5])
+
+    # Define the grid where you want to interpolate
+    grid_x, grid_y = np.mgrid[0:1:101j, 0:1:101j]
+
+    # Perform interpolation
+    grid_z = griddata(points, values, (grid_x, grid_y), method='cubic')
+
+    # Step 2: Extract Interpolated Data Points
+    # After interpolation, you have a grid of x, y, and z values.
+    # You need to flatten these arrays to prepare them for writing to a file.
+    # Flatten the grid arrays
+    x_flat = grid_x.flatten()
+    y_flat = grid_y.flatten()
+    z_flat = grid_z.flatten()
+
+    # Step 3: Write Data to a Text File
+    # Now, you can write the flattened arrays to a text file with three columns.
+
+    # Combine the flattened arrays into a single 2D array
+    data = np.column_stack((x_flat, y_flat, z_flat))
+
+    # Write to a text file
+    np.savetxt('interpolated_data.txt', data, fmt='%.6f', delimiter=' ', header='x  y  z', comments='')
+    print('Done')
+
 if __name__=="__main__":
-    tst_griddata2()
+    tst_griddata2n()
+    # export_griddata()
