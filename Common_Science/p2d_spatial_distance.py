@@ -6,12 +6,13 @@ from scipy.spatial import distance
 from icecream import ic
 import numpy as np
 import matplotlib.pyplot as plt
-from math import factorial
+# from math import factorial
 import scipy.special
 from math import *
+import inspect
 import sys
 
-from sympy import false
+from scipy.spatial.distance import squareform
 
 def the_pdist():
     """
@@ -19,13 +20,14 @@ def the_pdist():
     Попарные расстояния между наблюдениями в n-мерном пространстве
     https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.pdist.html
     """
+    print("Function = ",inspect.currentframe().f_code.co_name)  # Вывод имени функции
     # --1-- Calc
     rng = np.random.default_rng(seed=125); nn=5
     pnts = rng.random((nn, 2))
-    print(pnts)
-    npairs=int(scipy.special.binom(nn,2))
-    print(npairs)
-    names=['euclidean',  'minkowski', 'cityblock', 'sqeuclidean', 'correlation']
+    # print(pnts)
+    npairs=int(scipy.special.binom(nn,2)) # Число пар = биномиальные коэффициенты
+    # print(npairs)
+    names=['euclidean',  'minkowski', 'cityblock', 'sqeuclidean']
     eucl=lambda x1, x2, y1, y2: hypot(x1-x2, y1-y2)
     mink=lambda x1, x2, y1, y2: sqrt(abs(x1-x2)**2+abs(y1-y2)**2)
     city=lambda x1, x2, y1, y2: abs(x2-x1)+abs(y2-y1)
@@ -38,8 +40,30 @@ def the_pdist():
         for i in range(nn):
             for j in range(nn):
                 if j>i:
-                    print(f'{curr:2} {i} {j} {fun1(pnts[i][0],pnts[j][0], pnts[i][1], pnts[j][1]):.3f} {res[curr]:.3f}')
+                    print(f'{curr:2}  {i} {j}   {fun1(pnts[i][0],pnts[j][0], pnts[i][1], pnts[j][1]):.3f}   {res[curr]:.3f}')
                     curr+=1
+    # --2-- View
+    plt.title("Различие расстояний")
+    for name_ in names:
+        res = distance.pdist(pnts,metric=name_)
+        plt.plot(res,label=name_)
+
+    plt.legend()
+    plt.grid()
+    plt.show()
+
+def the_cdist():
+    """
+    Compute distance between each pair of the two collections of inputs.
+    Вычислите расстояние между каждой парой двух наборов входных данных.
+    https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.cdist.html
+    """
+    print("Function = ",inspect.currentframe().f_code.co_name)  # Вывод имени функции
+    # --1-- Calc
+    rng = np.random.default_rng(seed=125); nn=5
+    pnts = rng.random((nn, 2))
+    res = distance.cdist(pnts, pnts, 'euclidean') # для одного и того же вектора
+    print(res)
 
 
 def the_corr():
@@ -113,9 +137,22 @@ def breaks2():
         else: continue  # продолжаем, если внутренний цикл не был прерван
         break  # внутренний цикл был прерван, прерываем и этот цикл
 
+def the_squareform():
+    print("Function = ",inspect.currentframe().f_code.co_name)  # Вывод имени функции
+    rng = np.random.default_rng(seed=125); nn=5
+    pnts = rng.random((nn, 2))
+    vec=distance.pdist(pnts)
+    print('vec=\n',vec,'\n')
+    mat=squareform(vec)
+    print('mat=\n',mat,'\n')
+    vec2=squareform(mat)
+    print('vec2=\n',vec2,'\n')
+
 if __name__=="__main__":
     # the_dice()
+    # the_cdist()
     the_pdist()
+    # the_squareform()
     # npairs()
     # breaks2()
     # the_corr()
