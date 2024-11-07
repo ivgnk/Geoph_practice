@@ -171,6 +171,128 @@ def the_2D():
     z=np.array((x, y)).T
     print(z)
 
+def the_rng_multivariate_normal():
+    tit = f"Function = {inspect.currentframe().f_code.co_name}"
+    print(tit)  # Вывод имени функции
+    # Cлучайное распределение. mean - среднее по x и y
+    # cov - матрица ковариации
+    # size - число точек
+    rng = np.random.default_rng(125);
+    cov = [([1, 0], [0, 1])]
+    cov.append(([0, 1], [1, 0])) # RuntimeWarning: covariance is not symmetric positive-semidefinite
+    cov.append(([0, 0], [0, 0]))
+    cov.append(([1, 1], [1, 1]))
+    plt.figure(figsize=(16, 8))
+    plt.suptitle(tit+' разные средние и ковариационные матрицы')
+    for ii,cov_ in enumerate(cov):
+        plt.subplot(2, 2, ii + 1)
+        plt.title('Ковар. матр. = '+str(cov_))
+        for i in [0, 6]:
+            for j in [0, 6]:
+                mn = [i, j]
+                a = rng.multivariate_normal(mean=mn, cov=cov_, size=15)
+                plt.scatter(a[:, 0], a[:, 1], label=str(mn))
+        plt.grid();  plt.legend()
+    plt.show()
+
+def the_rng_multivariate_normal_view():
+    nn=75
+    cov = [([1, 0.25], [0.25, 1])]
+    cov.append(([1, 0.75], [0.75, 1]))
+    cov.append(([5, 0], [0, 5]))
+    cov.append(([2, 0.25], [0.25, 2]))
+    # cov.append(([1, 0.25], [0.75, 1]))
+    # cov.append(([1, 0.75], [0.25, 1]))
+    the_rng_multivariate_normal2(cov, nn)
+    # cov=[]
+    # mi=0.25; ma=2.25
+    # cov.append(([1, mi], [mi, 1]))
+    # cov.append(([1, mi], [ma, 1]))
+    # cov.append(([1, ma], [mi, 1]))
+    # cov.append(([1, ma], [ma, 1]))
+    # the_rng_multivariate_normal2(cov, nn)
+
+def the_rng_multivariate_normal2(the_cov,sz):
+    tit = f"Function = {inspect.currentframe().f_code.co_name}"
+    print(tit)  # Вывод имени функции
+    # Cлучайное распределение. mean - среднее по x и y
+    # cov - матрица ковариации
+    # size - число точек
+    rng = np.random.default_rng(125);
+    cov = the_cov
+    plt.figure(figsize=(16, 8))
+    plt.suptitle(tit+' разные средние и ковариационные матрицы')
+    for ii,cov_ in enumerate(cov):
+        plt.subplot(2, 2, ii + 1)
+        plt.title('Ковариационная матрица = '+str(cov_))
+        for i in [0, 6]:
+            for j in [0, 6]:
+                mn = [i, j]
+                a = rng.multivariate_normal(mean=mn, cov=cov_, size=sz)
+                plt.scatter(a[:, 0], a[:, 1], label=str(mn))
+        plt.grid();  plt.legend()
+    plt.show()
+
+from scipy.cluster.vq import kmeans2
+def the_kmeans2fun():
+    """
+    https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.vq.kmeans2.html
+    """
+    ###### -1 - исходные данные
+    tit = f"Function = {inspect.currentframe().f_code.co_name}"
+    print(tit)  # Вывод имени функции
+    rng = np.random.default_rng(125)
+    # Для плоскости задание 3 наборов случайных точек многомерного (2-мерного)
+    # случайного распределения. mean - среднее по x и y
+    # cov - матрица ковариации
+    # size - число точек
+    mmean=np.array([[0,6], [2,0], [6,4]]); nname='ист. центры'
+    ca=[[2,  1], [ 1, 1.5]]
+    cb=[[1, -1], [-1, 3.0]]
+    cc=[[5,  0], [ 0, 1.2]]
+    a = rng.multivariate_normal(mean = mmean[0], cov = ca, size=45)
+    b = rng.multivariate_normal(mean = mmean[1], cov = cb, size=30)
+    c = rng.multivariate_normal(mean = mmean[2], cov = cc, size=25)
+    plt.figure(figsize=(16, 5))
+    plt.title(tit)
+    plt.scatter(a[:, 0], a[:, 1], label='a - cov matr '+str(ca))
+    plt.scatter(b[:, 0], b[:, 1], label='b - cov matr '+str(cb))
+    plt.scatter(c[:, 0], c[:, 1], label='c - cov matr '+str(cc))
+    plt.grid();
+    plt.gca().set_aspect("equal") # принудительно сделать квадратную сетку
+    plt.legend();  plt.show()
+
+    ###### -2 - кластеризация
+    # z = np.concatenate((a, b, c))
+    # rng.shuffle(z) # перемешивание
+    # centroid, label = kmeans2(z, 3, iter=90, minit='points')
+    # print('centroid - близки к указанным в mean')
+    # print(centroid); print(mmean)
+    # counts = np.bincount(label)
+    # print('counts = \n',counts)
+    # без shuffle
+    print('\nбез shuffle')
+    z = np.concatenate((a, b, c))
+    centroid, label = kmeans2(z, 3, iter=90, minit='points')
+    print('centroid - близки к указанным в mean')
+    print(centroid)
+    print(nname); print(mmean)
+    counts = np.bincount(label)
+    print('counts = \n',counts)
+    ###### -3 - Plot the clusters.
+    w0 = z[label == 0]
+    w1 = z[label == 1]
+    w2 = z[label == 2]
+    plt.plot(w0[:, 0], w0[:, 1], 'o', alpha=0.5, label='cluster 0')
+    plt.plot(w1[:, 0], w1[:, 1], 'd', alpha=0.5, label='cluster 1')
+    plt.plot(w2[:, 0], w2[:, 1], 's', alpha=0.5, label='cluster 2')
+    plt.plot(centroid[:, 0], centroid[:, 1], 'k*', label='centroids')
+    plt.plot(mmean[:,0], mmean[:,1], 'r*', label=nname)
+    plt.axis('equal'); plt.grid()
+    plt.legend(shadow=True)
+    plt.show()
+
+
 if __name__=="__main__":
     # print(the_whiten())
     # print(the_kmeans())
@@ -178,4 +300,7 @@ if __name__=="__main__":
     # tst_mark()
     # the_vstack()
     # the_2D()
-    the_kmeans3()
+    # the_kmeans3()
+    # the_rng_multivariate_normal()
+    # the_rng_multivariate_normal_view()
+    the_kmeans2fun()
